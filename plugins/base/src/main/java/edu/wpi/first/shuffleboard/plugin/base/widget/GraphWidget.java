@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import de.gsi.chart.XYChart;
 import de.gsi.chart.axes.spi.DefaultNumericAxis;
 import de.gsi.chart.plugins.Zoomer;
+import de.gsi.chart.plugins.Panner;
 import de.gsi.dataset.DataSet;
 import de.gsi.dataset.spi.DoubleDataSet;
 import edu.wpi.first.shuffleboard.api.components.ActionList;
@@ -33,6 +34,9 @@ import javafx.collections.ListChangeListener;
 import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
+import javafx.scene.control.ToggleButton;
+import javafx.event.EventHandler;
+import javafx.scene.input.MouseEvent;
 import org.fxmisc.easybind.EasyBind;
 
 import java.util.ArrayList;
@@ -62,6 +66,8 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
   private DefaultNumericAxis xAxis;
   @FXML
   private DefaultNumericAxis yAxis;
+  @FXML
+  private ToggleButton autoScrollToggle;
 
   private final BooleanProperty yAxisAutoRanging = new SimpleBooleanProperty(true);
   private final DoubleProperty yAxisMinBound = new SimpleDoubleProperty(-1);
@@ -82,6 +88,7 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
     final DataSource<double[]> source = sourceFor(property);
     updateFromArraySource(source);
   };
+
 
   private final Function<DoubleDataSet, BooleanProperty> createVisibleProperty = s -> {
     SimpleBooleanProperty visible = new SimpleBooleanProperty(this, s.getName(), true);
@@ -121,7 +128,12 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
 
   @FXML
   private void initialize() {
+    chart.getPlugins().add(new Panner());
     chart.getPlugins().add(new Zoomer());
+
+
+
+    autoScrollToggle.setSelected(true);
     yAxisAutoRanging.addListener((__, was, useAutoRanging) -> {
       if (useAutoRanging) {
         yAxis.minProperty().unbind();
@@ -167,6 +179,8 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
         }
       }
     });
+
+
     xAxis.setTickLabelFormatter(new StringConverter<>() {
       @Override
       public String toString(Number num) {
@@ -295,6 +309,7 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
 
   private void update() {
     FxUtils.runOnFxThread(() -> {
+
       // Data is only pushed to the graph via listeners, so this prevents the graph
       // from staying still during a period of no updates.
       for (var source : numberSeriesMap.keySet()) {
@@ -319,9 +334,13 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
           return OptionalDouble.of(xValues[doubleDataSet.getDataCount(DataSet.DIM_X) - 1]);
         });
 
-        if (max.isPresent()) {
+        if (max.isPresent() && autoScrollToggle.isSelected()) {
           xAxis.maxProperty().set(max.getAsDouble());
+          xAxis.minProperty().bind(xAxis.maxProperty().subtract(visibleTime.multiply(1e3)));
           doubleDataSet.fireInvalidated(null);
+        }else{
+          xAxis.maxProperty().unbind();
+          xAxis.minProperty().unbind();
         }
       }
     });
