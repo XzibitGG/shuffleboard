@@ -35,8 +35,6 @@ import javafx.fxml.FXML;
 import javafx.scene.layout.Pane;
 import javafx.util.StringConverter;
 import javafx.scene.control.ToggleButton;
-import javafx.event.EventHandler;
-import javafx.scene.input.MouseEvent;
 import org.fxmisc.easybind.EasyBind;
 
 import java.util.ArrayList;
@@ -89,7 +87,6 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
     updateFromArraySource(source);
   };
 
-
   private final Function<DoubleDataSet, BooleanProperty> createVisibleProperty = s -> {
     SimpleBooleanProperty visible = new SimpleBooleanProperty(this, s.getName(), true);
     visible.addListener((__, was, is) -> {
@@ -130,8 +127,6 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
   private void initialize() {
     chart.getPlugins().add(new Panner());
     chart.getPlugins().add(new Zoomer());
-
-
 
     autoScrollToggle.setSelected(true);
     yAxisAutoRanging.addListener((__, was, useAutoRanging) -> {
@@ -179,8 +174,6 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
         }
       }
     });
-
-
     xAxis.setTickLabelFormatter(new StringConverter<>() {
       @Override
       public String toString(Number num) {
@@ -309,7 +302,6 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
 
   private void update() {
     FxUtils.runOnFxThread(() -> {
-
       // Data is only pushed to the graph via listeners, so this prevents the graph
       // from staying still during a period of no updates.
       for (var source : numberSeriesMap.keySet()) {
