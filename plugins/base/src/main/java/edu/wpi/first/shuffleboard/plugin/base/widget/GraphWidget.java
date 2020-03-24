@@ -330,10 +330,10 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
           xAxis.maxProperty().set(max.getAsDouble());
           xAxis.minProperty().bind(xAxis.maxProperty().subtract(visibleTime.multiply(1e3)));
           doubleDataSet.fireInvalidated(null);
-        }else{
+        } else {
           xAxis.maxProperty().unbind();
           xAxis.minProperty().unbind();
-        }
+        } 
       }
     });
   }
