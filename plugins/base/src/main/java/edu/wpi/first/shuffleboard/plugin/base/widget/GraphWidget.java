@@ -333,7 +333,7 @@ public class GraphWidget extends AbstractWidget implements AnnotatedWidget {
         } else {
           xAxis.maxProperty().unbind();
           xAxis.minProperty().unbind();
-        } 
+        }
       }
     });
   }
